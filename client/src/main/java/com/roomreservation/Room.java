@@ -11,6 +11,8 @@ public class Room {
 
     Room(String roomNumber, String sectionNumber){
         this.ID = -1;
+        this.roomNumber = roomNumber;
+        this.sectionNumber = sectionNumber;
         this.description = "Default";
         this.projectors = 0;
         this.computers = 0;

@@ -3,23 +3,26 @@ import json
 import socket as sk
 from src.despacher import Despacher
 
+# Nao precisa ser multithread
 def handle_client(client_adress, client_request, socket_udp):
     # TODO: Usar "MessageHistoric" para tratar duplicamento de mensagens
 
     client_request = client_request.decode('utf-8')
     client_request_json = json.loads(client_request)
 
-    # QUESTION: Há problemas em enviar a requisição já desserializada para o despachante?
-    response_args = Despacher.handle_request(client_request)
+    response_args = Despacher.handle_request(client_request_json)
+
+    response_args = json.dumps(response_args)
 
     server_response = {
         "messageType": 1,
-        "requestId":  client_request_json["requestId"],
+        "id":  client_request_json["id"],
         "objectReference": client_request_json["objectReference"],
         "methodId": client_request_json["methodId"],
         "arguments": response_args
     }
 
+    server_response = json.dumps(server_response)
     socket_udp.sendto(server_response.encode(), client_adress)
 
 def main():
@@ -31,10 +34,7 @@ def main():
 
     while True:
         client_request, client_adress = socket_udp.recvfrom(1024)
-        client_thread = threading.Thread(target=handle_client, args=(client_adress, 
-                                                                     client_request, 
-                                                                     socket_udp))
-        client_thread.start()
+        handle_client(client_adress, client_request, socket_udp)
 
 
 if __name__ == "__main__":

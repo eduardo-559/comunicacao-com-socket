@@ -2,20 +2,18 @@ import json
 from src.room_reservation import RoomReservation
 from entities.room import Room
 
-# QUESTION: Esqueleto como classe estática é uma boa prática?
+
 class RoomReservationSkeleton:
 
     room_reservation = RoomReservation()
 
     @staticmethod
-    def add_room(args: str):
+    def addRoom(args: str):
         json_args = json.loads(args)
 
-        #QUESTION: É preciso fazer verificação de dados? (Se eles estão corretos, ou pode ser feito do lado do cliente?)
+        new_room = Room(json_args["roomNumber"], json_args["sectionNumber"])
 
-        new_room = Room(*json_args)
-
-        return RoomReservationSkeleton.room_reservation.add_room(Room)
+        return RoomReservationSkeleton.room_reservation.addRoom(new_room)
 
     @staticmethod
     def get_all_rooms(args: str):

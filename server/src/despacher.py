@@ -35,6 +35,6 @@ class Despacher:
         class_object = Despacher.remote_objects[object_reference]
         method = Despacher._get_method(class_object, method_id)
 
-        response_json = method(request["args"])
+        response_json = method(request["arguments"])
         return response_json
 
