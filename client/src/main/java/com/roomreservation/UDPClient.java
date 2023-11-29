@@ -30,21 +30,15 @@ public class UDPClient {
     }
 
     public void sendRequest(byte[] requestMessage){
-        while(true){
-            try{
-                DatagramPacket requestPacket = new DatagramPacket(requestMessage, requestMessage.length, serverInetAddress, serverPort);
-                SocketUDP.send(requestPacket);
-
-                break;
-            } catch (SocketTimeoutException err){
-                continue;
-            } catch (IOException err){
-                System.out.println(err.getMessage());
-            } 
-        }
+        try{
+            DatagramPacket requestPacket = new DatagramPacket(requestMessage, requestMessage.length, serverInetAddress, serverPort);
+            SocketUDP.send(requestPacket);
+        } catch (IOException err){
+            System.out.println(err.getMessage());
+        } 
     }
 
-    public String getReply(){
+    public String getReply() {
         String serverResponse = "";
         byte[] bufferResponse = new byte[1024];
             
@@ -52,6 +46,9 @@ public class UDPClient {
         try {
             SocketUDP.receive(responsePacket);
             serverResponse = new String(responsePacket.getData(), 0, responsePacket.getLength());
+        
+        } catch (SocketTimeoutException err){
+            return "TIMEOUTED";
         } catch (IOException err){
             System.out.println(err.getMessage());
         }

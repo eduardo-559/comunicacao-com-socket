@@ -39,6 +39,11 @@ public class RoomReservationProxy {
 
         String response = udpClient.getReply();
 
+        while(response == "TIMEOUTED"){
+            udpClient.sendRequest(jsonRequest.getBytes());
+            response = udpClient.getReply();
+        }
+
         String responseArgs = this.unpackMessage(response);
         return responseArgs;        
     }
