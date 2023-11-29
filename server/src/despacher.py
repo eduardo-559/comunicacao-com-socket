@@ -1,10 +1,8 @@
+from entities.message import Message
 from src.room_reservation_skeleton import RoomReservationSkeleton
-
-# QUESTION: Despachante como classe estática é uma boa prática?
 
 class Despacher:
 
-    # QUESTION: Usar um dicionario de metodos remotos é uma abordagem válida?
     remote_objects = {
         "RoomReservation": RoomReservationSkeleton,
     }
@@ -15,8 +13,8 @@ class Despacher:
             return Despacher.remote_objects[class_name]
         
         else:
-            ...
-            # QUESTION: Como lidar caso o objeto remoto nao exista?
+            print(" > Requisição Inválida!")
+            print("Classe " + class_name  + " inválida!")
 
     @staticmethod
     def _get_method(class_object, method_name):
@@ -24,17 +22,14 @@ class Despacher:
             method_reference = getattr(class_object, method_name)
             return method_reference
         else:
-            ...
-            # QUESTION: Como lidar caso o método remoto nao exista?
+            print(" > Requisição Inválida!")
+            print("Método " + method_name  + " inválido!")
 
     @staticmethod
-    def handle_request(request: dict):
-        object_reference = request["objectReference"]
-        method_id = request['methodId']
-        
-        class_object = Despacher.remote_objects[object_reference]
-        method = Despacher._get_method(class_object, method_id)
+    def handle_request(message_client: Message):
+        class_object = Despacher.remote_objects[message_client.objectReference]
+        method = Despacher._get_method(class_object, message_client.methodId)
 
-        response_json = method(request["arguments"])
-        return response_json
+        response_args = method(message_client.arguments)
+        return response_args
 

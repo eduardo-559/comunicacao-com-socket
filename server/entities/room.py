@@ -1,15 +1,17 @@
+import json
+
 class Room:
-    def __init__(self, section_number, room_number):
-        self.ID = -1
-        self.room_number = room_number
-        self.section_number = section_number
-        self.description = ""
-        self.projectors = 0
-        self.computers = 0
-        self.is_occupied = False
+    def __init__(self, ID, description, roomNumber, sectionNumber, projectors, computers, isOccupied):
+        self.ID = ID
+        self.description = description
+        self.roomNumber = roomNumber
+        self.sectionNumber = sectionNumber
+        self.projectors = projectors
+        self.computers = computers
+        self.isOccupied = isOccupied
 
     def get_room_and_section(self):
-        return f"Bloco {self.section_number} - Sala {self.room_number}"
+        return f"Bloco {self.sectionNumber} - Sala {self.roomNumber}"
 
     def set_id(self, new_id) -> None:
         self.ID = new_id
@@ -21,7 +23,10 @@ class Room:
         return self.computers
 
     def is_occupied(self) -> bool:
-        return self.occupied
+        return self.isOccupied
+    
+    def set_occupied(self, status) -> bool:
+        self.isOccupied = status
 
     def __str__(self) -> str:
         return f"{self.ID} - {self.description}"

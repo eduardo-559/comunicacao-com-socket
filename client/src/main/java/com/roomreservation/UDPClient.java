@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 public class UDPClient {
@@ -19,6 +20,7 @@ public class UDPClient {
             this.serverAdress = "localhost";
             this.serverPort = 3456;
             this.serverInetAddress = InetAddress.getByName(serverAdress);
+            SocketUDP.setSoTimeout(3000);
 
         } catch (SocketException err){
             System.out.println(err.getMessage());
@@ -27,19 +29,37 @@ public class UDPClient {
         }
     }
 
-    public String sendRequest(byte[] requestMessage){
-        try{
-            DatagramPacket requestPacket = new DatagramPacket(requestMessage, requestMessage.length, serverInetAddress, serverPort);
-            SocketUDP.send(requestPacket);
-            byte[] bufferResponse = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(bufferResponse, bufferResponse.length);
-            SocketUDP.receive(responsePacket);
-            String serverResponse = new String(responsePacket.getData(), 0, responsePacket.getLength());
-            return serverResponse;
+    public void sendRequest(byte[] requestMessage){
+        while(true){
+            try{
+                DatagramPacket requestPacket = new DatagramPacket(requestMessage, requestMessage.length, serverInetAddress, serverPort);
+                SocketUDP.send(requestPacket);
 
-        }   catch (IOException err){
+                break;
+            } catch (SocketTimeoutException err){
+                continue;
+            } catch (IOException err){
+                System.out.println(err.getMessage());
+            } 
+        }
+    }
+
+    public String getReply(){
+        String serverResponse = "";
+        byte[] bufferResponse = new byte[1024];
+            
+        DatagramPacket responsePacket = new DatagramPacket(bufferResponse, bufferResponse.length);
+        try {
+            SocketUDP.receive(responsePacket);
+            serverResponse = new String(responsePacket.getData(), 0, responsePacket.getLength());
+        } catch (IOException err){
             System.out.println(err.getMessage());
         }
-        return "";
+
+        return serverResponse;
+    }
+
+    public void finish(){
+        this.SocketUDP.close();
     }
 }

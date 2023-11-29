@@ -9,18 +9,18 @@ public class Room {
     private Integer computers;
     private Boolean isOccupied;
 
-    Room(String roomNumber, String sectionNumber){
+    Room(String description, String roomNumber, String sectionNumber, Integer projectors, Integer computers){
         this.ID = -1;
+        this.description = description;
         this.roomNumber = roomNumber;
         this.sectionNumber = sectionNumber;
-        this.description = "Default";
-        this.projectors = 0;
-        this.computers = 0;
+        this.projectors = projectors;
+        this.computers = computers;
         this.isOccupied = false;
     }
 
     public String getRoomAndSection(){
-        return "Sala " + this.roomNumber + " - Bloco " + this.sectionNumber;
+        return "Bloco " + this.sectionNumber + " - Sala " + this.roomNumber;
     }
 
     public Integer getID(){

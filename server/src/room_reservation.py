@@ -11,11 +11,44 @@ class RoomReservation:
         self.current_id += 1
 
         self.rooms.append(room)
-        print("[Salas cadastradas]")
         for room in self.rooms:
             print(room.get_room_and_section())
 
-        return True
 
-    def get_all_rooms(self):
+    def searchRoom(self, sectionNumber, roomNumber):
+        for room in self.rooms:
+            if room.sectionNumber == sectionNumber and room.roomNumber == roomNumber:
+                return room
+        return None
+
+    def getAllRooms(self):
         return self.rooms
+    
+    def removeRoom(self, IDRoom):
+        for index, room in enumerate(self.rooms):
+            if room.ID == int(IDRoom):
+                return self.rooms.pop(index)
+
+        return None
+    
+    def reserveRoom(self, IDRoom):
+        for room in self.rooms:
+            if room.ID == int(IDRoom):
+                if room.is_occupied():
+                    return False
+                else:
+                    room.set_occupied(True)
+                    return True
+
+        return None
+    
+    def cancelReservation(self, IDRoom):
+        for room in self.rooms:
+            if room.ID == int(IDRoom):
+                if not room.is_occupied():
+                    return False
+                else:
+                    room.set_occupied(False)
+                    return True
+
+        return None

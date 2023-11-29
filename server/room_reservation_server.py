@@ -1,29 +1,53 @@
-import threading
 import json
 import socket as sk
+from entities.message import Message
 from src.despacher import Despacher
+from src.message_historic import MessageHistoric
 
-# Nao precisa ser multithread
-def handle_client(client_adress, client_request, socket_udp):
-    # TODO: Usar "MessageHistoric" para tratar duplicamento de mensagens
+# Responsável pelo tratamento de mensagens duplicadas
+historicMap = MessageHistoric()
 
+def packs_message(id, objectReference, methodId, arguments):
+    response_message = dict()
+
+    response_message["messageType"] = 1
+    response_message["id"] = id
+    response_message["objectReference"] = objectReference
+    response_message["methodId"] = methodId
+    response_message["arguments"] = arguments
+
+    response_json = json.dumps(response_message)
+    return response_json
+
+
+def unpack_message(client_request):
     client_request = client_request.decode('utf-8')
-    client_request_json = json.loads(client_request)
+    client_message = json.loads(client_request, object_hook=lambda dct : Message(**dct))
 
-    response_args = Despacher.handle_request(client_request_json)
+    return client_message
 
-    response_args = json.dumps(response_args)
+def handle_client(client_adress, client_request, socket_udp):
+    client_ip, client_port = client_adress
+    client_message = unpack_message(client_request)
 
-    server_response = {
-        "messageType": 1,
-        "id":  client_request_json["id"],
-        "objectReference": client_request_json["objectReference"],
-        "methodId": client_request_json["methodId"],
-        "arguments": response_args
-    }
+    # Faço a verificação das mensagens duplicadas
+    saved_historic = historicMap.verify_duplication(client_ip, client_port, client_message.id)
 
-    server_response = json.dumps(server_response)
-    socket_udp.sendto(server_response.encode(), client_adress)
+    # Verifico se a mensagem é duplicada, caso seja, apenas reenvio, caso contrário processo a requisição
+    if saved_historic is not None:
+        socket_udp.sendto(saved_historic.encode(), client_adress)
+    else:
+        response_args = Despacher.handle_request(client_message)
+
+        response_json = packs_message(client_message.id, 
+                                    client_message.objectReference, 
+                                    client_message.methodId, 
+                                    response_args)
+        
+        # Salvo a mensagem no histórico de mensagens
+        historicMap.update_historic(client_ip, client_port, id, response_json)
+
+        socket_udp.sendto(response_json.encode(), client_adress)
 
 def main():
     server_adress = ("localhost", 3456)
